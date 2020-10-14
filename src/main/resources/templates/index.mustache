@@ -6,22 +6,32 @@
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Document</title>
+    <script src="../static/main.js"></script>
 </head>
 <body>
-<form action="/calculate" method="post">
+<form action="/calculate" method="post" name="data">
     <div><label>Function 1:
-        <input type="text" name="function1" />
-    </label></div>
-    <div><label>Function 2:
-        <input type="text" name="function2" />
-    </label></div>
-    <div><label>Repeat count:
-        <input type="number" name="count" />
-    </label></div>
-    <div><label>Ordered:
-        <input type="checkbox" name="ordered" />
-    </label></div>
-    <div>  <button type="submit" class="btn btn-primary">Submit</button></div>
+        <input type="text" name="function1"/>
+    </label>
+    </div>
+    <div>
+        <label>Function 2:
+            <input type="text" name="function2"/>
+        </label>
+    </div>
+    <div>
+        <label>Repeat count:
+            <input type="number" name="count"/>
+        </label>
+    </div>
+    <div>
+        <label>Ordered:
+            <input type="text" name="outputOrder"/>
+        </label>
+    </div>
+    <div>
+        <button type="submit">Submit</button>
+    </div>
 </form>
 </body>
 </html>
