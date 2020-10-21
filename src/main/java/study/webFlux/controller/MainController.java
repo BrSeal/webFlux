@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import reactor.core.publisher.Flux;
-import springfox.documentation.spring.web.plugins.Docket;
 import study.webFlux.model.FormData;
 
 @Controller
@@ -34,6 +33,11 @@ public class MainController {
         return "index";
     }
 
+    @GetMapping("/api")
+    public String showApi() {
+        return "redirect:/swagger-ui/";
+    }
+
     @PostMapping(
             value = "/calculate",
             consumes = {MediaType.APPLICATION_FORM_URLENCODED_VALUE},
@@ -42,6 +46,6 @@ public class MainController {
     @ResponseBody
     @ApiOperation(value = "returns Flux<String> with results of calculations", response = Flux.class)
     public Flux<String> showResults(FormData data) {
-        return service.generateFlux( data);
+        return service.generateFlux(data);
     }
 }

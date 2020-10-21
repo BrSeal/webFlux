@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 @ControllerAdvice
 public class MyControllerAdvice {
     @ExceptionHandler(Exception.class)
-    protected ResponseEntity<String> handleE(Exception ex) {
+    protected ResponseEntity<String> handle() {
         return new ResponseEntity<>("Something gone horribly wrong!", HttpStatus.BAD_REQUEST);
     }
 }
