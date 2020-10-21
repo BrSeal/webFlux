@@ -24,31 +24,6 @@ public class FluxGenerator {
     private static final int FUNCTION_2 = 2;
     private static final String ERR_TIME = "n/a";
 
-    private final ScriptEngine engine;
-    /**
-     * Пример упорядоченной выдачи результатов:
-     *      <№ итерации>,
-     *      <результат функции 1>,
-     *      <время расчета функции 1>,
-     *      <кол-во полученных наперед результатов функции 1 (еще не выданных, в связи с медленным расчетом функции 2)>,
-     *
-     *      <результат функции 2>,
-     *      <время расчета функции 2>,
-     *      <кол-во полученных наперед результатов функции 2 (еще не выданных, в связи с медленным расчетом функции 1)>
-     *
-     * Пример неупорядоченной выдачи результатов:
-     *     <№ итерации>,
-     *     <номер функции>,
-     *     <результат функции>,
-     *     <время расчета функции>
-     */
-    ////////////////////////////////////////////////////////////////////
-
-    public FluxGenerator() {
-        this.engine = new ScriptEngineManager().getEngineByName("nashorn");
-    }
-
-    //sorted part
     public Flux<String> generate(String fn1, String fn2, int count, boolean isOrdered) {
         HashMap<Long, String[]> f1results = new HashMap<>();
         HashMap<Long, String[]> f2results = new HashMap<>();
@@ -94,13 +69,14 @@ public class FluxGenerator {
     }
 
     private Flux<Integer> generateFunctionResultFlux(String function, int fnNum, int count, Map<Long,String[]> f1results) {
+        ScriptEngine engine= new ScriptEngineManager().getEngineByName("nashorn");
         return Flux.interval(Duration.ZERO)
-                .map(counter -> getFunctionResult(function, counter, f1results, fnNum))
+                .map(counter -> getFunctionResult(engine,function, counter, f1results, fnNum))
                         .limitRequest(count);
     }
 
     // [result,time]
-    private int getFunctionResult(String function, long argument, Map<Long,String[]> map, int fnNum) {
+    private int getFunctionResult(ScriptEngine engine,String function, long argument, Map<Long,String[]> map, int fnNum) {
         String functionName = function.split("[ (]")[1];
         String[] result=new String[2];
 
