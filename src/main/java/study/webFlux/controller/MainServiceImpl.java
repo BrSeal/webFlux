@@ -25,6 +25,6 @@ public class MainServiceImpl implements MainService {
         String fn1 = data.getFunction1();
         String fn2 = data.getFunction2();
 
-        return isOrdered ? generator.generateOrdered(fn1, fn2, count) : generator.generateUnordered(fn1, fn2, count);
+        return generator.generate(fn1, fn2, count,isOrdered);
     }
 }
