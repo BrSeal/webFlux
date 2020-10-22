@@ -9,39 +9,38 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 import java.time.Duration;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 public class FluxGenerator {
     @Value("${fluxDelayValue}")
     private int DELAY;
-    @Value("${generationDelay}")
-    private int GENERATION_DELAY;
+
 
     private static final String UNORDERED_OUTPUT = "%s,%s,%s,%s\n";
     private static final String ORDERED_OUTPUT = "%d,%s,%s,%d,%s,%s,%d\n";
     private static final String ERR_MSG = "Exception: %s";
     private static final String ERR_TIME = "n/a";
 
+    private static final int GENERATION_DELAY=10;
     private static final int FUNCTION_1 = 1;
     private static final int FUNCTION_2 = 2;
 
     public Flux<String> generate(String fn1, String fn2, int count, boolean isOrdered) {
-        HashMap<Long, String[]> f1results = new HashMap<>();
-        HashMap<Long, String[]> f2results = new HashMap<>();
+        ConcurrentHashMap<Long, String[]> f1results = new ConcurrentHashMap<>();
+        ConcurrentHashMap<Long, String[]> f2results = new ConcurrentHashMap<>();
 
         Flux<Integer> fn1Flux = generateFunctionResultFlux(fn1, FUNCTION_1, count, f1results);
         Flux<Integer> fn2Flux = generateFunctionResultFlux(fn2, FUNCTION_2, count, f2results);
 
         if (isOrdered) {
             return Flux.merge(fn1Flux, fn2Flux)
-
                     .map(fnNum -> {
                         int f1counter = f1results.size();
                         int f2counter = f2results.size();
 
-                        if (fnNum == 1 && f1counter > f2counter || fnNum != 1 && f1counter < f2counter) {
+                        if (fnNum == 1 && f1counter > f2counter || fnNum == 2 && f2counter > f1counter) {
                             return "";
                         }
 
@@ -57,6 +56,7 @@ public class FluxGenerator {
                         }
                         return String.format(ORDERED_OUTPUT, min - 1, f1[0], f1[1], f1ahead, f2[0], f2[1], f2ahead);
                     })
+                    .distinct()
                     .delayElements(Duration.ofMillis(DELAY));
 
 
