@@ -3,6 +3,7 @@ package study.webFlux.controller;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
+import reactor.core.scheduler.Schedulers;
 
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
@@ -10,19 +11,24 @@ import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 import java.time.Duration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executors;
 
 @Component
 public class FluxGenerator {
     @Value("${fluxDelayValue}")
     private int DELAY;
+    @Value("$generationDelay")
+    private int GENERATION_DELAY;
 
     private static final String UNORDERED_OUTPUT = "%s,%s,%s,%s\n";
     private static final String ORDERED_OUTPUT = "%d,%s,%s,%d,%s,%s,%d\n";
     private static final String ERR_MSG = "Exception: %s";
+    private static final String ERR_TIME = "n/a";
+
     private static final int FUNCTION_1 = 1;
     private static final int FUNCTION_2 = 2;
-    private static final String ERR_TIME = "n/a";
 
     public Flux<String> generate(String fn1, String fn2, int count, boolean isOrdered) {
         HashMap<Long, String[]> f1results = new HashMap<>();
@@ -33,6 +39,7 @@ public class FluxGenerator {
 
         if (isOrdered) {
             return Flux.merge(fn1Flux, fn2Flux)
+
                     .map(fnNum -> {
                         int f1counter = f1results.size();
                         int f2counter = f2results.size();
@@ -52,9 +59,10 @@ public class FluxGenerator {
                             f1ahead = 0;
                         }
                         return String.format(ORDERED_OUTPUT, min - 1, f1[0], f1[1], f1ahead, f2[0], f2[1], f2ahead);
-
                     })
                     .delayElements(Duration.ofMillis(DELAY));
+
+
         } else {
             return Flux.merge(fn1Flux, fn2Flux)
                     .map(fnNum -> {
@@ -70,7 +78,7 @@ public class FluxGenerator {
 
     private Flux<Integer> generateFunctionResultFlux(String function, int fnNum, int count, Map<Long,String[]> f1results) {
         ScriptEngine engine= new ScriptEngineManager().getEngineByName("nashorn");
-        return Flux.interval(Duration.ZERO)
+        return Flux.interval(Duration.ofMillis(GENERATION_DELAY))
                 .map(counter -> getFunctionResult(engine,function, counter, f1results, fnNum))
                         .limitRequest(count);
     }
