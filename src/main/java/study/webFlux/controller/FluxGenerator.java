@@ -3,7 +3,6 @@ package study.webFlux.controller;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
-import reactor.core.scheduler.Schedulers;
 
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
@@ -11,15 +10,13 @@ import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 import java.time.Duration;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Executors;
 
 @Component
 public class FluxGenerator {
     @Value("${fluxDelayValue}")
     private int DELAY;
-    @Value("$generationDelay")
+    @Value("${generationDelay}")
     private int GENERATION_DELAY;
 
     private static final String UNORDERED_OUTPUT = "%s,%s,%s,%s\n";
@@ -76,32 +73,32 @@ public class FluxGenerator {
         }
     }
 
-    private Flux<Integer> generateFunctionResultFlux(String function, int fnNum, int count, Map<Long,String[]> f1results) {
-        ScriptEngine engine= new ScriptEngineManager().getEngineByName("nashorn");
+    private Flux<Integer> generateFunctionResultFlux(String function, int fnNum, int count, Map<Long, String[]> f1results) {
+        ScriptEngine engine = new ScriptEngineManager().getEngineByName("nashorn");
         return Flux.interval(Duration.ofMillis(GENERATION_DELAY))
-                .map(counter -> getFunctionResult(engine,function, counter, f1results, fnNum))
-                        .limitRequest(count);
+                .map(counter -> getFunctionResult(engine, function, counter, f1results, fnNum))
+                .limitRequest(count);
     }
 
     // [result,time]
-    private int getFunctionResult(ScriptEngine engine,String function, long argument, Map<Long,String[]> map, int fnNum) {
+    private int getFunctionResult(ScriptEngine engine, String function, long argument, Map<Long, String[]> map, int fnNum) {
         String functionName = function.split("[ (]")[1];
-        String[] result=new String[2];
+        String[] result = new String[2];
 
         try {
             long start = System.currentTimeMillis();
             engine.eval(function);
 
-            Invocable invocable = (Invocable)engine ;
+            Invocable invocable = (Invocable) engine;
 
-            result[0]= invocable.invokeFunction(functionName, argument).toString();
-            result[1]=  (System.currentTimeMillis() - start)+"";
+            result[0] = invocable.invokeFunction(functionName, argument).toString();
+            result[1] = (System.currentTimeMillis() - start) + "";
 
         } catch (ScriptException ex) {
-            String exText=ex.getLocalizedMessage();
-            String errMsg=String.format(ERR_MSG, exText);
-            result[0]= errMsg;
-            result[1]=ERR_TIME;
+            String exText = ex.getLocalizedMessage();
+            String errMsg = String.format(ERR_MSG, exText);
+            result[0] = errMsg;
+            result[1] = ERR_TIME;
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
         }
