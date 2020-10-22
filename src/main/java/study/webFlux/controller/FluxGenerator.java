@@ -69,6 +69,7 @@ public class FluxGenerator {
 
                         return String.format(UNORDERED_OUTPUT, lastKey, fnNum, fnResult[0], fnResult[1]);
                     })
+                    .distinct()
                     .delayElements(Duration.ofMillis(DELAY));
         }
     }
