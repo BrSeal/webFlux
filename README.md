@@ -1,4 +1,4 @@
 # webFlux
-My realisation of the Titan JS Calculator
+My realisation of JS Calculator
 
 Simple RESTful Reactive Spring web-app
