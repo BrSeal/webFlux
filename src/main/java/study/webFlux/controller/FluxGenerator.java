@@ -76,7 +76,7 @@ public class FluxGenerator {
 
     private Flux<Integer> generateFunctionResultFlux(String function, int fnNum, int count, Map<Long, String[]> f1results) {
         ScriptEngine engine = new ScriptEngineManager().getEngineByName("nashorn");
-        return Flux.interval(Duration.ofMillis(GENERATION_DELAY))
+        return Flux.interval(Duration.ZERO)
                 .map(counter -> getFunctionResult(engine, function, counter, f1results, fnNum))
                 .limitRequest(count);
     }
@@ -93,7 +93,14 @@ public class FluxGenerator {
             Invocable invocable = (Invocable) engine;
 
             result[0] = invocable.invokeFunction(functionName, argument).toString();
-            result[1] = (System.currentTimeMillis() - start) + "";
+
+            long timeSpent=System.currentTimeMillis() - start;
+
+            result[1] = timeSpent + "";
+
+            if(timeSpent<GENERATION_DELAY) {
+                Thread.sleep(GENERATION_DELAY-timeSpent);
+            }
 
         } catch (ScriptException ex) {
             String exText = ex.getLocalizedMessage();
